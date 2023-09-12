@@ -1,6 +1,7 @@
 ### GOES XRS Exploratory Data Analysis:
 
 **Contents**:
+
 `GOES_XRS_historical.fits`: FITS file that includes data for all GOES flares from 2017-August 2023. This is the .FITS file to be used when performing the parameter search. Depending on size, either new columns will be added when more arrays are made, or a new FITS with just those arrays (e.g. derivatives) will be incorporated.
 
 `FITS_plots`: visualization of all the flares.
