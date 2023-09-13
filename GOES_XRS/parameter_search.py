@@ -111,6 +111,7 @@ class ParameterSearch:
         self.save_flarelist_to_df()
         self.save_fitsinfo_to_df()
         self.calculate_c5_bool()
+        self.drop_na()
     
     def save_flarelist_to_df(self):
         ''' This is done outside of the loop (for all iterations). Saves calculated values to DataFrame for each flare.
@@ -138,6 +139,14 @@ class ParameterSearch:
         self.launches_df['Mean_FOXSI_C5'] = self.launches_df['Mean_FOXSI'] > 5e-6
         self.launches_df['Max_HiC_C5'] = self.launches_df['Max_HiC'] > 5e-6
         self.launches_df['Mean_HiC_C5'] = self.launches_df['Mean_HiC'] > 5e-6
+        
+    def drop_na(self):
+        print('before drop NA')
+        print(len(self.launches_df['Flare_ID']))
+        self.launches_df = self.launches_df.dropna()
+        print('after drop NA')
+        print(len(self.launches_df['Flare_ID']))
+        
     
     def save_DataFrame(self, parameter):
         self.launches_df.to_csv(f'{self.directory}/{parameter}_{self.savestring}_results.csv')
