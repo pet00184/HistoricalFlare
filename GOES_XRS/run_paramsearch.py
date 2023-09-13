@@ -25,7 +25,27 @@ def xrsb_value_search():
     launches_df_list = ['1e-06_xrsb_fulltry_results.csv', '2.5e-06_xrsb_fulltry_results.csv','5e-06_xrsb_fulltry_results.csv',
                 '7.5e-06_xrsb_fulltry_results.csv']
     plot_directory_list = ['1e-06_results', '2.5e-06_results', '5e-06_results', '7.5e-06_results']
-    pr.plotting_results(param_directory, launches_df_list, plot_directory_list)
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, xrsb_level)
+    
+def xrsa_value_search():
+    ''' Parameter search for the XRSA flux level. This is also somewhat a baseline search, but hopefully it proves more helpful!
+    
+    '''
+    xrsa_level = [1e-7, 1.5e-7, 2e-7, 2.5e-7, 3e-7, 3.5e-7, 4e-7, 4.5e-7, 5e-7, 5.5e-7]
+    param_directory = 'XRSA_FluxValue'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+        
+    param_search = ps.ParameterSearch(xrsa_level, 'xrsa_values', param_directory)
+    param_search.loop_through_parameters(param_search.data['xrsa'])
+
+    launches_df_list = ['1e-07_xrsa_values_results.csv', '1.5e-07_xrsa_values_results.csv', 
+                '2e-07_xrsa_values_results.csv', '2.5e-07_xrsa_values_results.csv', '3e-07_xrsa_values_results.csv', 
+                '3.5e-07_xrsa_values_results.csv', '4e-07_xrsa_values_results.csv', '4.5e-07_xrsa_values_results.csv',
+                '5e-07_xrsa_values_results.csv', '5.5e-07_xrsa_values_results.csv']
+    plot_directory_list = ['1e-07_results', '1.5e-07_results', '2e-07_results', '2.5e-07_results', '3e-07_results',
+                '3.5e-07_results', '4e-07_results', '4.5e-07_results', '5e-07_results', '5.5e-07_results',]
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, xrsa_level)
     
 if __name__ == '__main__':
-    xrsb_value_search()
+    xrsa_value_search()

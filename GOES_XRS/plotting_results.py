@@ -76,8 +76,9 @@ class VisualizingData:
         tn, fp, fn, tp = conf_matrix.ravel()
         accuracy = (tp + tn) / (tp + tn + fp + fn)
         precision = tp / (tp + fp)
-        recall = tp / (tp + fn)
-        f1_score = 2 * (precision * recall) / (precision + recall) 
+        self.recall = tp / (tp + fn)
+        f1_score = 2 * (precision * self.recall) / (precision + self.recall) 
+        self.fpr = fp / (fp + tn)
 
         fig, ax = plt.subplots(figsize=(7.5, 7.5))
         ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.7)
@@ -87,7 +88,7 @@ class VisualizingData:
         plt.xlabel('Launched Y/N', fontsize=18)
         plt.ylabel('Flare Above C5', fontsize=18)
         plt.suptitle(f'Confusion Matrix for Launches', fontsize=18)
-        plt.title(f'accuracy={accuracy:.2f}, precision={precision:.2f}, recall={recall:.2f}, F1={f1_score:.2f}', fontsize=12)
+        plt.title(f'accuracy={accuracy:.2f}, precision={precision:.2f}, recall={self.recall:.2f}, F1={f1_score:.2f}', fontsize=12)
         plt.savefig(f'{self.save_directory}/ynlaunchconfmatrix.png', dpi=200)
         plt.close()
        
@@ -108,7 +109,8 @@ class VisualizingData:
             f.write(f'\t Max observed HiC flux C5 or above: {self.hicmax_aboveC5} ({self.hicmax_aboveC5/self.total_launches*100:.1f}%) \n')
             f.write(f'\t Mean observed HiC flux C5 or above: {self.hicmean_aboveC5} ({self.hicmean_aboveC5/self.total_launches*100:.1f}%) \n')
       
-def plotting_results(param_directory, launches_df_list, plot_directory_list):
+def plotting_results(param_directory, launches_df_list, plot_directory_list, param_level):
+    roc_list = []
     for i, launches_df in enumerate(launches_df_list):
         #making launch and save directories, and initializing class
         launch_directory = os.path.join(param_directory, launches_df)
@@ -127,9 +129,23 @@ def plotting_results(param_directory, launches_df_list, plot_directory_list):
             plottest.plot_observed_confusionmatrix(group[0], group[1])
         #doing confusion matrices for y/n launch 
         plottest.plot_launches_confusionmatrix()
+        roc_list.append([plottest.recall, plottest.fpr, param_level[i]])
         #saving summary text file
         plottest.make_textsummary_file(param_directory, plot_directory_list[i])
         print(f'all plots and summary file complete for {launches_df}!')
+    roc_plot(roc_list, param_directory)
+    print('roc plot done!')
+    
+def roc_plot(roc_list, param_directory):
+    fig, ax = plt.subplots(figsize=(7.5, 7.5))
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.set_title(f'ROC Space for {param_directory}')
+    ax.plot([0, 1], [0, 1], ls='--', c='r', lw=2, label='Random Classifier')
+    for param in roc_list:
+        ax.plot(param[1], param[0], marker='o', markersize=5, label=str(param[2]))
+    ax.legend()
+    plt.savefig(f'{param_directory}/ROC_plot.png', dpi=200)
             
 # if __name__ == "__main__":
 #
