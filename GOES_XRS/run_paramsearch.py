@@ -5,7 +5,7 @@ from astropy.io import fits
 import numpy as np
 import math
 
-calculated_params = '../../HistoricalGOESFITS/GOES_computed_parameters.fits' #change depending on if you put your fits file somewhere else!
+calculated_params = 'GOES_computed_parameters.fits' #change depending on if you put your fits file somewhere else!
 cparam_hdu = fits.open(calculated_params)
 cparam = cparam_hdu[1].data
 
