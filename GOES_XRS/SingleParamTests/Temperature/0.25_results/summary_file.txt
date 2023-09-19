@@ -1,0 +1,10 @@
+Parameter Type: Temperature 
+Parameter Value: 0.25_results 
+ 
+Total Launches: 1157 of 8844  Flares (13.1%)
+Of the 1157 launches: 
+	 Flares C5 or above: 121 (10.5%) 
+	 Max observed FOXSI flux C5 or above: 98 (8.5%) 
+	 Mean observed FOXSI flux C5 or above: 95 (8.2%) 
+	 Max observed HiC flux C5 or above: 94 (8.1%) 
+	 Mean observed HiC flux C5 or above: 91 (7.9%) 
