@@ -1,0 +1,10 @@
+Parameter Type: IncreaseFromBackgroundFraction 
+Parameter Value: 4_results 
+ 
+Total Launches: 1204 of 8844  Flares (13.6%)
+Of the 1204 launches: 
+	 Flares C5 or above: 500 (41.5%) 
+	 Max observed FOXSI flux C5 or above: 386 (32.1%) 
+	 Mean observed FOXSI flux C5 or above: 349 (29.0%) 
+	 Max observed HiC flux C5 or above: 363 (30.1%) 
+	 Mean observed HiC flux C5 or above: 314 (26.1%) 
