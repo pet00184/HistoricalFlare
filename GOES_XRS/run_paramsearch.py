@@ -10,7 +10,8 @@ cparam_hdu = fits.open(calculated_params)
 cparam = cparam_hdu[1].data
 
 
-####### XRSB Flux Level Parameter Search ################
+################# SINGLE PARAMETER SEARCHES #########################################################################
+#####################################################################################################################
 def xrsb_value_search():
     ''' Parameter Search for the XRSB flux level. Baseline search used mostly to get the parameter search and plotting up and 
     running.
@@ -110,6 +111,22 @@ def min_increase_xrsb_search(cparam, n):
     plot_directory_list = ['1e-08_results', '5e-08_results', '1e-07_results', '5e-07_results', '1e-06_results', '5e-06_results',]
     pr.plotting_results(param_directory, launches_df_list, plot_directory_list, rough_diff)
     
+def min_increase_xrsa_search(cparam, n):
+    ''' Parameter search for the 1-minute difference in flux between datapoints
+    '''
+    rough_diff = [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6]
+    param_directory = f'XRSADifferences_{n}Min'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+
+    param_search = ps.ParameterSearch(rough_diff, f'{n}_diff_XRSA', param_directory)
+    param_search.loop_through_parameters(cparam[f'XRSA {n}-min Differences'])
+
+    launches_df_list = [f'1e-08_{n}_diff_XRSA_results.csv', f'5e-08_{n}_diff_XRSA_results.csv', f'1e-07_{n}_diff_XRSA_results.csv',
+                f'5e-07_{n}_diff_XRSA_results.csv', f'1e-06_{n}_diff_XRSA_results.csv', f'5e-06_{n}_diff_XRSA_results.csv',]
+    plot_directory_list = ['1e-08_results', '5e-08_results', '1e-07_results', '5e-07_results', '1e-06_results', '5e-06_results',]
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, rough_diff)
+    
 def min_increase_xrsb_search_pct(cparam, n):
     ''' Parameter search for the 1-minute difference in flux between datapoints in percentage!
     '''
@@ -123,6 +140,22 @@ def min_increase_xrsb_search_pct(cparam, n):
 
     launches_df_list = [f'20_{n}_diff_pct_XRSB_results.csv',f'30_{n}_diff_pct_XRSB_results.csv', f'40_{n}_diff_pct_XRSB_results.csv',
             f'50_{n}_diff_pct_XRSB_results.csv', f'60_{n}_diff_pct_XRSB_results.csv', f'70_{n}_diff_pct_XRSB_results.csv']
+    plot_directory_list = ['20_results', '30_results', '40_results', '50_results', '60_results', '70_results']
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, rough_diff)
+    
+def min_increase_xrsa_search_pct(cparam, n):
+    ''' Parameter search for the 1-minute difference in flux between datapoints in percentage!
+    '''
+    rough_diff = [20, 30, 40, 50, 60, 70]
+    param_directory = f'XRSADifferencesPct_{n}Min'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+
+    param_search = ps.ParameterSearch(rough_diff, f'{n}_diff_pct_XRSA', param_directory)
+    param_search.loop_through_parameters(cparam[f'XRSA {n}-min Differences %'])
+
+    launches_df_list = [f'20_{n}_diff_pct_XRSA_results.csv',f'30_{n}_diff_pct_XRSA_results.csv', f'40_{n}_diff_pct_XRSA_results.csv',
+            f'50_{n}_diff_pct_XRSA_results.csv', f'60_{n}_diff_pct_XRSA_results.csv', f'70_{n}_diff_pct_XRSA_results.csv']
     plot_directory_list = ['20_results', '30_results', '40_results', '50_results', '60_results', '70_results']
     pr.plotting_results(param_directory, launches_df_list, plot_directory_list, rough_diff)
     
@@ -158,7 +191,289 @@ def temp_difference_search(cparam, n):
     plot_directory_list = ['0.5_results', '1_results', '5_results', '10_results']
     pr.plotting_results(param_directory, launches_df_list, plot_directory_list, rough_diff)
     
+#####################################################################################################################
+#####################################################################################################################
+
+################# DOUBLE PARAMETER SEARCHES #########################################################################
+#####################################################################################################################
+
+def xrsa_xrsb_search():
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [3e-7, 3.5e-7, 4e-7, 4.5e-7]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = 'XRSA&XRSB_FluxValue'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, 'xrsa&xrsb_fluxlevel', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = param_search.data['xrsa']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsa&xrsb_fluxlevel_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_bkgincrease_search(cparam):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [5e-7, 7e-7, 1e-6, 1.5e-6, 2e-6, 2.5e-6, 3e-6, 5e-6]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = 'XRSBFlux_BkgIncrease'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, 'xrsbflux_bkgincrease', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam['Increase above Background']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_bkgincrease_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_bkgincrease_frac_search(cparam):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [1,2,3,4,5,10,12,15,20]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = 'XRSBFlux_BkgIncreaseFRAC'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, 'xrsbflux_bkgincrease_frac', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam['Increase above Background Fraction']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_bkgincrease_frac_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_mindiff_search(cparam, n):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_{n}MinDifference'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_{n}mindiff', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'XRSB {n}-min Differences']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_{n}mindiff_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_xrsamindiff_search(cparam, n):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [1e-8, 5e-8, 1e-7, 5e-7, 1e-6, 5e-6]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_XRSA{n}MinDifference'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_xrsa{n}mindiff', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'XRSA {n}-min Differences']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_xrsa{n}mindiff_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_mindiff_pct_search(cparam, n):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [20, 30, 40, 50, 60, 70]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_{n}MinDifference_Pct'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_{n}mindiff_pct', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'XRSB {n}-min Differences %']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_{n}mindiff_pct_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_tempdiff_search(cparam, n):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [.5, 1, 5, 10]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_{n}MinDifference_Temp'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_{n}mindiff_temp', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'Temp {n}-min Differences']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_{n}mindiff_temp_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_temp_search(cparam):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [.1, .15, .2, .25, .3]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_Temp'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_temp', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'Temperature (xrsa/xrsb)']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_temp_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
+    
+def xrsb_xrsamindiff_pct_search(cparam, n):
+    ''' Trying to do both xrsa and xrsb at the same time to start out!!
+    '''
+    #first- get parameters into a list of tuples of all possible combos
+    param1 = [2e-6, 3e-6, 4e-6, 5e-6] 
+    param2 = [20, 30, 40, 50, 60, 70]
+    combo_params = np.array(np.meshgrid(param1, param2)).T.reshape(-1,2)
+    
+    #initializing the parameter search and making the right folder:
+    param_directory = f'XRSBFlux_XRSA{n}MinDifference_Pct'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'xrsbflux_xrsa{n}mindiff_pct', param_directory)
+
+    #next- need to get arrays into a tuple format
+    arrays1 = param_search.data['xrsb']
+    arrays2 = cparam[f'XRSA {n}-min Differences %']
+    combo_arrays = list(zip(arrays1, arrays2))
+
+    #actually doing the parameter search:
+    param_search.loop_through_parameters(combo_arrays)
+    
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_xrsbflux_xrsa{n}mindiff_pct_results.csv')
+    plot_directory_list = []
+    for param in combo_params:
+        plot_directory_list.append(f'{param}_results')
+    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params)
 
 
 if __name__ == '__main__':
    #temp_difference_search(cparam, 5)
+   #flux_double_test(cparam)
+   #xrsa_xrsb_search()
+   #xrsb_bkgincrease_frac_search(cparam)
+   #xrsb_tempdiff_search(cparam, 5)
+   #xrsb_temp_search(cparam)
+   #min_increase_xrsa_search_pct(cparam, 1)
+   xrsb_xrsamindiff_pct_search(cparam, 1)
