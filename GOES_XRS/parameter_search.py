@@ -56,21 +56,32 @@ class ParameterSearch:
            if self.triggered_bool: 
                self.calculate_observed_xrsb(i)         
 
-    def flareloop_check_if_value_surpassed(self, array, parameter, i):
+    def flareloop_check_if_value_surpassed(self, arrays, parameters, i):
         ''' Process used to loop through flares when there is only a value being checked, and whether the curve
         surpasses that value. This will start as a blank slate to be used for xrsb and xrsa levels, and could also
         be used once a new array of the derivative is calculated, temp, etc. at each point.
     
         Input: 
-        array = array (flare) to be checked (xrsa, xrsb or a computed temp/derivative etc.)
-        parameter = value that if surpassed triggers a launch.
+        array = list of arrays (flare) to be checked (xrsa, xrsb or a computed temp/derivative etc.)
+        parametesr = list of values that if surpassed triggers a launch.
+        ***these are now lists for multiple parameters that will be zipped!!
     
         Returns: 
         triggered_bool = True if this flare triggers a launch, otherwise is False.
         indeces of the trigger, foxsi obs start/end and hic obs start/end to be used for computing observed flux
         '''
         self.triggered_bool = False
-        triggered_check = np.where(array >= parameter)[0]
+        df = pd.DataFrame()
+        if isinstance(parameters, np.float64):
+            triggered_check = np.where(arrays > parameters)[0]
+        elif isinstance(parameters, np.int64):
+            triggered_check = np.where(arrays > parameters)[0]
+        else:
+            for arr, p in zip(arrays, parameters):
+                df[f'param {p}'] = np.array(arr) >= p
+            truth_df = df.all(1)
+            triggered_check = np.where(truth_df == True)[0]
+        #triggered_check = np.where(array >= parameter)[0]
         if not len(triggered_check)==0:
             self.triggered_bool = True
             self.trigger_index = triggered_check[0]

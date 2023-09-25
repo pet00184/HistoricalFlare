@@ -1,0 +1,10 @@
+Parameter Type: XRSBFlux_BkgIncreaseFRAC 
+Parameter Value: [3.e-06 5.e+00]_results 
+ 
+Total Launches: 557 of 8844  Flares (6.3%)
+Of the 557 launches: 
+	 Flares C5 or above: 434 (77.9%) 
+	 Max observed FOXSI flux C5 or above: 341 (61.2%) 
+	 Mean observed FOXSI flux C5 or above: 302 (54.2%) 
+	 Max observed HiC flux C5 or above: 305 (54.8%) 
+	 Mean observed HiC flux C5 or above: 274 (49.2%) 

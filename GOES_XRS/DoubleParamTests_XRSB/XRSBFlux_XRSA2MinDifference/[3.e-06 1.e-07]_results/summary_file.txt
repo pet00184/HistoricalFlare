@@ -1,0 +1,10 @@
+Parameter Type: XRSBFlux_XRSA2MinDifference 
+Parameter Value: [3.e-06 1.e-07]_results 
+ 
+Total Launches: 1912 of 8844  Flares (21.6%)
+Of the 1912 launches: 
+	 Flares C5 or above: 1202 (62.9%) 
+	 Max observed FOXSI flux C5 or above: 901 (47.1%) 
+	 Mean observed FOXSI flux C5 or above: 773 (40.4%) 
+	 Max observed HiC flux C5 or above: 844 (44.1%) 
+	 Mean observed HiC flux C5 or above: 726 (38.0%) 
