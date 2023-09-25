@@ -76,6 +76,13 @@ class MakingParamArrays:
         self.t = Table(self.columns, names=self.column_names)
         print(self.t.info)
         self.t.write('GOES_computed_parameters.fits', overwrite=True)
+
+       
+def add_c5_10min_bool():
+    ''' adding function to add on the C5 flux for 10 min or longer bool. This is what we will use for the true/false
+    in the new ROC curves for deciding if the flare is viable or not. (will change the C5 to C5 10 min or longer)
+    '''
+    
         
         
         
