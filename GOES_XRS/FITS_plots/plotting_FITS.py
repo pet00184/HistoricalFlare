@@ -36,12 +36,30 @@ class FITS_plots:
         logbins=np.logspace(np.log10(1e-8),np.log10(1e-2), 50)
         fig, ax = plt.subplots(1,1,figsize=(8,6))
         ax.hist(self.data['peak flux'], bins=logbins, range=(1e-8, 1e-2))
-        ax.axvline(5e-6, c='r', lw=2)
+        ax.axvline(5e-6, c='r', lw=2, label='C5')
         ax.set_xscale('log')
         ax.set_xlabel('GOES Flux W/m$^2$')
         ax.set_ylabel('# of Flares')
         ax.set_title(f'Peak Flux \n Abolve C5={above_c5}, Below={len(peak_flux) - above_c5}')
         plt.savefig('peak_flux_histogram.png', bbox_inches='tight', dpi=200)
+        ax.legend()
+        plt.show()
+        
+    def c5_10min_histogram(self):
+        above_c5 = len(np.where(self.data['above c5']==True)[0])
+        above_c5_10min = len(np.where(self.data['above c5 10min']==True)[0])
+        above_c5_10min_data = self.data[self.data['above c5 10min']==True]
+        logbins=np.logspace(np.log10(1e-8),np.log10(1e-2), 50)
+        fig, ax = plt.subplots(1,1,figsize=(8,6))
+        ax.hist(above_c5_10min_data['peak flux'], bins=logbins, range=(1e-8, 1e-2))
+        ax.axvline(5e-6, c='r', lw=2, label='C5')
+        ax.axvline(1e-5, c='k', lw=2, label='M1')
+        ax.set_xscale('log')
+        ax.set_xlabel('GOES Flux W/m$^2$')
+        ax.set_ylabel('# of Flares')
+        ax.set_title(f'Peak Flux of Flares above C5 for 10 Minutes')
+        ax.legend()
+        plt.savefig('c5_10min_peak_flux_histogram.png', bbox_inches='tight', dpi=200)
         plt.show()
         
     def time_to_peak_histogram(self):
@@ -55,17 +73,21 @@ class FITS_plots:
         plt.show()
         
     def ttp_histogram_c5(self):
-        c5 = np.where(self.data['above c5']==True)[0]
+        c5 = np.where(self.data['above c5 10min']==True)[0]
         ttp = self.data['start to peak time'][c5]
         print(np.min(ttp), np.max(ttp))
         print(np.mean(ttp))
         print(st.mode(ttp))
+        print(np.median(ttp))
         fig, ax = plt.subplots(1,1,figsize=(8,6))
         ax.hist(ttp, bins=30, range=(0, 60))
+        ax.axvline(np.mean(ttp), c='r', lw=2, label='Mean')
+        ax.axvline(np.median(ttp), c='k', lw=2, label='Median')
         ax.set_xlabel('Start to Peak Time (minutes)')
         ax.set_ylabel('# of Flares')
-        ax.set_title(f'Start to Peak \n Mean=13 minutes, Mode=7 minutes')
-        plt.savefig('stp_c5.png', bbox_inches='tight', dpi=200)
+        ax.set_title(f'Start to Peak, C5 for 10 Minutes \n Mean=15 min, Mode=13 min, Median=13 min')
+        ax.legend()
+        plt.savefig('stp_c5_10min.png', bbox_inches='tight', dpi=200)
         plt.show()
         
     def year_hists(self):
@@ -113,8 +135,9 @@ class FITS_plots:
 if __name__ == '__main__':
     test = FITS_plots(flare_fits)
     #test.plot_one(2)
-    test.peak_flux_histogram()
+    #test.peak_flux_histogram()
     #test.time_to_peak_histogram()
-    #test.ttp_histogram_c5()
+    test.ttp_histogram_c5()
     # test.year_hists()
     # test.year_barplot()
+    #test.c5_10min_histogram()

@@ -11,10 +11,6 @@ class ParameterSearch:
     
     flare_fits = 'GOES_XRS_historical.fits'
     
-    calculated_flarelist = [] #has format of [flare #, flare ID, max foxsi, mean foxsi, max hic, mean hic] for each tuple
-    launches_df = pd.DataFrame(columns=('Flare_Number', 'Flare_ID', 'Trigger_Time', 'Max_FOXSI', 'Mean_FOXSI', 'Max_HiC', 'Mean_HiC', 'Max_FOXSI_C5', 
-                    'Mean_FOXSI_C5', 'Max_HiC_C5', 'Mean_HiC_C5', 'Flare_C5', 'Flare_Class', 'Flare_Max_Flux', 'Peak_Time', 'Start_to_Peak', 'Background_Flux'))
-    
     def __init__(self, parameter_array, save_string, directory):
         '''Saves .fits file data to Astropy Table structure (works similarly to regular .fits, but also lets you
         parse the data by rows.)
@@ -25,6 +21,9 @@ class ParameterSearch:
         self.param_grid = np.array(parameter_array)
         self.savestring = save_string
         self.directory = directory
+        self.calculated_flarelist = [] #has format of [flare #, flare ID, max foxsi, mean foxsi, max hic, mean hic] for each tuple
+        self.launches_df = pd.DataFrame(columns=('Flare_Number', 'Flare_ID', 'Trigger_Time', 'Max_FOXSI', 'Mean_FOXSI', 'Max_HiC', 'Mean_HiC', 'Max_FOXSI_C5', 
+                        'Mean_FOXSI_C5', 'Max_HiC_C5', 'Mean_HiC_C5', 'Flare_C5', 'Flare_Class', 'Flare_Max_Flux', 'Peak_Time', 'Start_to_Peak', 'Background_Flux'))
         
     def loop_through_parameters(self, arrays_to_check):
         ''' Loops through each parameter, and performes launch analysis on each flare. This is the function you will
@@ -139,6 +138,7 @@ class ParameterSearch:
             self.launches_df.loc[f, 'Flare_Max_Flux'] = self.data['peak flux'][launched_flare]
             self.launches_df.loc[f, 'Start_to_Peak'] = self.data['start to peak time'][launched_flare]
             self.launches_df.loc[f, 'Flare_C5'] = self.data['above C5'][launched_flare]
+            self.launches_df.loc[f, 'Flare_C5_10min'] = self.data['above C5 10min'][launched_flare]
             self.launches_df.loc[f, 'Background_Flux'] = self.data['background flux'][launched_flare]
             self.launches_df.loc[f, 'Peak_Time'] = self.data['UTC peak time'][launched_flare]
     
