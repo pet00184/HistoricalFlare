@@ -1,0 +1,11 @@
+Parameter Type: IncreaseFromBackground_C510min 
+Parameter Value: 7e-07_results 
+ 
+Total Launches: 3889 of 8844  Flares (44.0%)
+Of the 3889 launches: 
+	 Flares C5 or above: 1245 (32.0%) 
+	 Flares C5 or above for 10 minutes or more: 808 (20.8%) 
+	 Max observed FOXSI flux C5 or above: 877 (22.6%) 
+	 Mean observed FOXSI flux C5 or above: 728 (18.7%) 
+	 Max observed HiC flux C5 or above: 823 (21.2%) 
+	 Mean observed HiC flux C5 or above: 707 (18.2%) 

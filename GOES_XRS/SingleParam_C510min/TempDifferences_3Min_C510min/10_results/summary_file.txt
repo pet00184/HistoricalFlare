@@ -1,0 +1,11 @@
+Parameter Type: TempDifferences_3Min_C510min 
+Parameter Value: 10_results 
+ 
+Total Launches: 1065 of 8844  Flares (12.0%)
+Of the 1065 launches: 
+	 Flares C5 or above: 110 (10.3%) 
+	 Flares C5 or above for 10 minutes or more: 79 (7.4%) 
+	 Max observed FOXSI flux C5 or above: 66 (6.2%) 
+	 Mean observed FOXSI flux C5 or above: 51 (4.8%) 
+	 Max observed HiC flux C5 or above: 67 (6.3%) 
+	 Mean observed HiC flux C5 or above: 52 (4.9%) 

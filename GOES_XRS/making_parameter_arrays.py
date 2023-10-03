@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from astropy.io import fits
-from astropy.table import Table
+from astropy.table import Table, Column
 from matplotlib import pyplot as plt
 from scipy import stats as st
 import math
@@ -82,28 +82,60 @@ def add_c5_10min_bool():
     ''' adding function to add on the C5 flux for 10 min or longer bool. This is what we will use for the true/false
     in the new ROC curves for deciding if the flare is viable or not. (will change the C5 to C5 10 min or longer)
     '''
+    flare_fits = 'GOES_XRS_historical.fits'
+    fitsfile = fits.open(flare_fits)
+    data = Table(fitsfile[1].data)[:]
+    print(data.columns)
+    header = fitsfile[1].header
+    xrsb = data['xrsb'][:]
     
+    c5_10min_bool_list = []
+    c5_thresh = 5e-6
+    minutes = 10
+    for flare in xrsb:
+        above_c5_arr = np.flatnonzero(np.convolve(flare>c5_thresh, np.ones(minutes, dtype=int),'valid')>=minutes)
+        if len(above_c5_arr) > 0:
+            c5_10min_bool_list.append(True)
+        else:
+            c5_10min_bool_list.append(False)
+    
+    #adding column to fits: 
+    data.add_column(c5_10min_bool_list, name='above C5 10min', index=9)
+    print(data.columns)
+    data.write('GOES_XRS_historical.fits', overwrite=True)
+    
+def testing_out():
+    flare_fits = 'GOES_XRS_historical.fits'
+    fitsfile = fits.open(flare_fits)
+    data = Table(fitsfile[1].data)[:]
+    print(data.columns)
+    print(data['above C5 10min'][260:270])
         
         
         
 if __name__ == '__main__':
-    t = MakingParamArrays()
-    t.save_xrsb_rise_above_background()
-    print('increase done')
-    t.save_temp()
-    print('temp done')
-    t.save_differences_between_further_points(1)
-    print('1 min done')
-    t.save_differences_between_further_points(2)
-    print('2 min done')
-    t.save_differences_between_further_points(3)
-    print('3 min done')
-    t.save_differences_between_further_points(4)
-    print('4 min done')
-    t.save_differences_between_further_points(5)
-    print('5 min done')
-    t.make_table()
-    print('fits saved')
+    '''Uncomment these for making the new FITS file with calculated parameters
+    '''
+    # t = MakingParamArrays()
+    # t.save_xrsb_rise_above_background()
+    # print('increase done')
+    # t.save_temp()
+    # print('temp done')
+    # t.save_differences_between_further_points(1)
+    # print('1 min done')
+    # t.save_differences_between_further_points(2)
+    # print('2 min done')
+    # t.save_differences_between_further_points(3)
+    # print('3 min done')
+    # t.save_differences_between_further_points(4)
+    # print('4 min done')
+    # t.save_differences_between_further_points(5)
+    # print('5 min done')
+    # t.make_table()
+    # print('fits saved')
+    ''' Uncomment this for adding the C5 for 10min or longer bool to the original .fits file
+    '''
+    #add_c5_10min_bool()
 
     
     
