@@ -113,6 +113,7 @@ class VisualizingData:
         else:
             plt.savefig(f'{self.save_directory}/ynlaunchconfmatrix.png', dpi=200)
         plt.close()
+        
        
     def make_textsummary_file(self, param_type, param_value):
         self.launches_aboveC5 = len(self.launches_df['Flare_C5'][self.launches_df['Flare_C5']==True])
