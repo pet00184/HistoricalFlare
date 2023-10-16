@@ -22,7 +22,7 @@ class ParameterSearch:
         self.savestring = save_string
         self.directory = directory
         self.calculated_flarelist = [] #has format of [flare #, flare ID, max foxsi, mean foxsi, max hic, mean hic] for each tuple
-        self.launches_df = pd.DataFrame(columns=('Flare_Number', 'Flare_ID', 'Trigger_Time', 'Max_FOXSI', 'Mean_FOXSI', 'Max_HiC', 'Mean_HiC', 'Max_FOXSI_C5', 
+        self.launches_df = pd.DataFrame(columns=('Flare_Number', 'Flare_ID', 'Trigger_Time', 'Cancelled?', 'Max_FOXSI', 'Mean_FOXSI', 'Max_HiC', 'Mean_HiC', 'Max_FOXSI_and_HiC_C5', 'Max_FOXSI_C5', 
                         'Mean_FOXSI_C5', 'Max_HiC_C5', 'Mean_HiC_C5', 'Flare_C5', 'Flare_Class', 'Flare_Max_Flux', 'Peak_Time', 'Start_to_Peak', 'Background_Flux'))
         
     def loop_through_parameters(self, arrays_to_check):
@@ -35,7 +35,6 @@ class ParameterSearch:
             print('now trying to perform post-loop functions')
             self.perform_postloop_functions()
             self.save_DataFrame(parameter)
-            print('dataframe saved!')
             self.calculated_flarelist = []
             self.launches_df = self.launches_df.iloc[0:0]
             
@@ -80,7 +79,6 @@ class ParameterSearch:
                 df[f'param {p}'] = np.array(arr) >= p
             truth_df = df.all(1)
             triggered_check = np.where(truth_df == True)[0]
-        #triggered_check = np.where(array >= parameter)[0]
         if not len(triggered_check)==0:
             self.triggered_bool = True
             self.trigger_index = triggered_check[0]
@@ -150,6 +148,7 @@ class ParameterSearch:
         self.launches_df['Mean_FOXSI_C5'] = self.launches_df['Mean_FOXSI'] > 5e-6
         self.launches_df['Max_HiC_C5'] = self.launches_df['Max_HiC'] > 5e-6
         self.launches_df['Mean_HiC_C5'] = self.launches_df['Mean_HiC'] > 5e-6
+        self.launches_df['Max_FOXSI_and_HiC_C5'] = (self.launches_df['Max_FOXSI'] > 5e-6) & (self.launches_df['Max_HiC'] > 5e-6)
         
     def drop_na(self):
         print('before drop NA')
@@ -160,7 +159,12 @@ class ParameterSearch:
         
     
     def save_DataFrame(self, parameter):
-        self.launches_df.to_csv(f'{self.directory}/{parameter}_{self.savestring}_results.csv')
+        if len(self.launches_df['Flare_ID']) > 10:
+            self.launches_df.to_csv(f'{self.directory}/{parameter}_{self.savestring}_results.csv')
+            print('dataframe saved!')
+        else:
+            print('not enough launches to be worth saving')
+        
     
 
 

@@ -1,9 +1,11 @@
 import parameter_search as ps
-import plotting_results as pr
+import new_plotting as pr
 import os
 from astropy.io import fits
 import numpy as np
 import math
+import warnings
+warnings.filterwarnings("ignore")
 
 calculated_params = 'GOES_computed_parameters.fits' #change depending on if you put your fits file somewhere else!
 cparam_hdu = fits.open(calculated_params)
@@ -25,7 +27,7 @@ def xrsb_value_search():
     '''
     xrsb_level = [1e-6, 2.5e-6, 5e-6, 7.5e-6]  
     print(type(xrsb_level[0]))
-    param_directory = 'XRSB_FluxValue_C510min'
+    param_directory = 'XRSB_FluxValue'
     if not os.path.exists(param_directory):
         os.mkdir(param_directory)
     
@@ -35,7 +37,7 @@ def xrsb_value_search():
     launches_df_list = ['1e-06_xrsb_fulltry_results.csv', '2.5e-06_xrsb_fulltry_results.csv','5e-06_xrsb_fulltry_results.csv',
                 '7.5e-06_xrsb_fulltry_results.csv']
     plot_directory_list = ['1e-06_results', '2.5e-06_results', '5e-06_results', '7.5e-06_results']
-    pr.plotting_results(param_directory, launches_df_list, plot_directory_list, xrsb_level, c5_10min=True)
+    pr.plotting_results(param_directory, launches_df_list, xrsb_level)
     
 def xrsa_value_search():
     ''' Parameter search for the XRSA flux level. This is also somewhat a baseline search, but hopefully it proves more helpful!
@@ -499,6 +501,59 @@ def xrsb_3xrsamin_3tempincrease(cparam):
         plot_directory_list.append(f'{param}_results')
     pr.plotting_results(param_directory, launches_df_list, plot_directory_list, combo_params, c5_10min=True)
     
+    
+def try_everything(cparam):
+    
+    xrsb = [3e-6, 4e-6, 5e-6]
+    xrsa = [4e-7, 4.5e-7, 5e-7]
+    bkgrnd_inc = [2e-6, 2.5e-6, 3e-6]
+    #min_increase_xrsb = [5e-7, 1e-6, 5e-6]
+    min_increase_xrsa = [5e-7, 1e-6, 5e-6]
+    temp = [.1, .15, .2]
+    temp_diff = [.1, .25]
+    combo_params = np.array(np.meshgrid(xrsb, xrsa, bkgrnd_inc,
+             min_increase_xrsa,
+             temp, temp_diff, )).T.reshape(-1, 6)
+    print(combo_params)
+    print(combo_params.shape)
+            
+    # #initializing the parameter search and making the right folder:
+    param_directory = f'TryingAlmostEverything_EvenLess'
+    if not os.path.exists(param_directory):
+        os.mkdir(param_directory)
+    param_search = ps.ParameterSearch(combo_params, f'almosteverything', param_directory)
+
+    xrsb_arr = param_search.data['xrsb']
+    xrsa_arr = param_search.data['xrsa']
+    bkgrnd_inc = cparam['Increase above Background']
+    # min1_xrsb = cparam[f'XRSB 1-min Differences']
+    # min2_xrsb = cparam[f'XRSB 2-min Differences']
+    # min3_xrsb = cparam[f'XRSB 3-min Differences']
+    # min4_xrsb = cparam[f'XRSB 4-min Differences']
+    #min5_xrsb = cparam[f'XRSB 5-min Differences']
+    # min1_xrsa = cparam[f'XRSA 1-min Differences']
+    # min2_xrsa = cparam[f'XRSA 2-min Differences']
+    # min3_xrsa = cparam[f'XRSA 3-min Differences']
+    # min4_xrsa = cparam[f'XRSA 4-min Differences']
+    min5_xrsa = cparam[f'XRSA 5-min Differences']
+    temp_arr = cparam['Temperature (xrsa/xrsb)']
+    # temp_1min = cparam[f'Temp 1-min Differences']
+    # temp_2min = cparam[f'Temp 2-min Differences']
+    # temp_3min = cparam[f'Temp 3-min Differences']
+    # temp_4min = cparam[f'Temp 4-min Differences']
+    temp_5min = cparam[f'Temp 5-min Differences']
+    combo_arrays = list(zip(xrsb_arr, xrsa_arr, bkgrnd_inc,
+             min5_xrsa, temp_arr,
+            temp_5min))
+
+    #actually doing the parameter search:
+    #param_search.loop_through_parameters(combo_arrays)
+
+    launches_df_list = []
+    for param in combo_params:
+        launches_df_list.append(f'{param}_almosteverything_results.csv')
+
+    pr.plotting_results(param_directory, launches_df_list, combo_params)
 
 
 if __name__ == '__main__':
@@ -566,7 +621,10 @@ if __name__ == '__main__':
     # xrsb_tempdiff_search(cparam, 5)
     # xrsb_temp_search(cparam)
     
-    xrsb_3xrsamin_3tempincrease(cparam)
+    #xrsb_3xrsamin_3tempincrease(cparam)
+    
+    try_everything(cparam)
+    
 
 
    
