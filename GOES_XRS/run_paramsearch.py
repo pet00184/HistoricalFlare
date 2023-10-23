@@ -27,17 +27,16 @@ def xrsb_value_search():
     '''
     xrsb_level = [1e-6, 2.5e-6, 5e-6, 7.5e-6]  
     print(type(xrsb_level[0]))
-    param_directory = 'XRSB_FluxValue'
+    param_directory = 'XRSB_FluxValue_new'
     if not os.path.exists(param_directory):
         os.mkdir(param_directory)
-    
+
     param_search = ps.ParameterSearch(xrsb_level, 'xrsb_fulltry', param_directory)
     param_search.loop_through_parameters(param_search.data['xrsb'])
+    
+    plotting = pr.Assessing_Data(f'{param_directory}/GoodEggParams/Good_combo_results.csv', param_directory)
+    plotting.plot_all_cfs()
 
-    launches_df_list = ['1e-06_xrsb_fulltry_results.csv', '2.5e-06_xrsb_fulltry_results.csv','5e-06_xrsb_fulltry_results.csv',
-                '7.5e-06_xrsb_fulltry_results.csv']
-    plot_directory_list = ['1e-06_results', '2.5e-06_results', '5e-06_results', '7.5e-06_results']
-    pr.plotting_results(param_directory, launches_df_list, xrsb_level)
     
 def xrsa_value_search():
     ''' Parameter search for the XRSA flux level. This is also somewhat a baseline search, but hopefully it proves more helpful!
@@ -559,7 +558,7 @@ def try_everything(cparam):
 if __name__ == '__main__':
     ''' Uncomment for single value param searches (c5_10min=True)
     '''
-    #xrsb_value_search()
+    xrsb_value_search()
     # xrsa_value_search()
     # increase_above_background_search(cparam)
     # increase_above_background_frac_search(cparam)
@@ -623,7 +622,7 @@ if __name__ == '__main__':
     
     #xrsb_3xrsamin_3tempincrease(cparam)
     
-    try_everything(cparam)
+    #try_everything(cparam)
     
 
 
