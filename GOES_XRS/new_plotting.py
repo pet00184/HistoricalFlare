@@ -67,11 +67,13 @@ class Assessing_Data:
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.axvspan(0, 0.4, color='red', alpha=.2)
+        getting_cmap = cm.get_cmap('viridis', len(self.combo_params['Param Combo']))
+        color_list = getting_cmap(np.linspace(0, 1, len(self.combo_params['Param Combo'])))
         for i, param_combo in enumerate(self.combo_params['Param Combo']):
-            ax.plot([self.combo_params.loc[i, 'Recall']], [self.combo_params.loc[i, 'Precision']], marker='o', markersize=5, label=param_combo)
+            ax.plot([self.combo_params.loc[i, 'Recall']], [self.combo_params.loc[i, 'Precision']], marker='o', markersize=5, label=param_combo, color=color_list[i])
         if include_bad: 
             for i, param_combo in enumerate(self.bad_eggs['Param Combo']):
-                ax.plot([self.bad_eggs.loc[i, 'Recall']], [self.bad_eggs.loc[i, 'Precision']], marker='o', markersize=5, label='_')
+                ax.plot([self.bad_eggs.loc[i, 'Recall']], [self.bad_eggs.loc[i, 'Precision']], marker='o', markersize=5, label='_', color='red')
         if len(self.combo_params['Param Combo']) < 10:        
             ax.legend(loc='lower left', fontsize=10)
         if include_bad:
