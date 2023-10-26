@@ -78,11 +78,11 @@ class MakingParamArrays:
         self.t.write('GOES_computed_parameters.fits', overwrite=True)
 
        
-def add_c5_10min_bool():
+def add_c5_10min_bool_and_em():
     ''' adding function to add on the C5 flux for 10 min or longer bool. This is what we will use for the true/false
     in the new ROC curves for deciding if the flare is viable or not. (will change the C5 to C5 10 min or longer)
     '''
-    flare_fits = 'GOES_XRS_historical.fits'
+    flare_fits = 'GOES_XRS_historical_testerem.fits'
     fitsfile = fits.open(flare_fits)
     data = Table(fitsfile[1].data)[:]
     print(data.columns)
@@ -102,7 +102,53 @@ def add_c5_10min_bool():
     #adding column to fits: 
     data.add_column(c5_10min_bool_list, name='above C5 10min', index=9)
     print(data.columns)
-    data.write('GOES_XRS_historical.fits', overwrite=True)
+    #data.write('GOES_XRS_historical_finalversion.fits', overwrite=True)
+    
+    em = data['em'][:]
+    
+    for n in [1,2,3,4,5]:
+        diff_em_list = []
+        diff_em_pct_list = []
+        for arr in em:
+            diff_em = arr[n:] - arr[:-n]
+            diff_em = np.concatenate([np.full(n, math.nan), diff_em]) #appending the right amount of zeros to front to make the indices correct
+            diff_em_list.append(diff_em)
+            diff_em_pct = []
+            for i, diffy in enumerate(diff_em):
+                diff_em_pct.append(diffy/arr[i]*100)
+            diff_em_pct_list.append(diff_em_pct)
+        data.add_column(diff_em_list, name=f'{n}-min em diff')
+        data.add_column(diff_em_pct_list, name=f'{n}-min em diff %')
+        print(data.columns)
+    data.write('GOES_XRS_historical_finalversion.fits', overwrite=True)
+    
+# def add_em_differences(n):
+#     flare_fits = 'GOES_XRS_historical_testerem.fits'
+#     fitsfile = fits.open(flare_fits)
+#     data = Table(fitsfile[1].data)[:]
+#     print(data.columns)
+#     header = fitsfile[1].header
+#     em = data['em'][:]
+#
+#     diff_em_list = []
+#     diff_em_pct_list = []
+#     for arr in em:
+#         diff_em = arr[n:] - arr[:-n]
+#         diff_em = np.concatenate([np.full(n, math.nan), diff_em]) #appending the right amount of zeros to front to make the indices correct
+#         diff_em_list.append(diff_em)
+#         diff_em_pct = []
+#         for i, diffy in enumerate(diff_em):
+#             diff_em_pct.append(diffy/arr[i]*100)
+#         diff_em_pct_list.append(diff_em_pct)
+#     data.add_column(diff_em_list, name=f'{n}-min em diff')
+#     data.add_column(diff_em_pct_list, name=f'{n}-min em diff %')
+#     print(data.columns)
+#     data.write('GOES_XRS_historical_finalversion.fits', overwrite=True)
+    #print(data[f'{n}-min em diff'][0:10])
+    
+    
+
+    
     
 def testing_out():
     flare_fits = 'GOES_XRS_historical.fits'
@@ -135,7 +181,12 @@ if __name__ == '__main__':
     # print('fits saved')
     ''' Uncomment this for adding the C5 for 10min or longer bool to the original .fits file
     '''
-    #add_c5_10min_bool()
+    add_c5_10min_bool_and_em()
+    # add_em_differences(1)
+    # add_em_differences(2)
+    # add_em_differences(3)
+    # add_em_differences(4)
+    # add_em_differences(5)
 
     
     

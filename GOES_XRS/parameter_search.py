@@ -10,9 +10,9 @@ import os
 
 class ParameterSearch:
     
-    flare_fits = 'GOES_XRS_historical.fits'
+    flare_fits = 'GOES_XRS_historical_finalversion.fits'
     
-    def __init__(self, parameter_array, directory):
+    def __init__(self, parameter_array, directory, multi=False):
         '''Saves .fits file data to Astropy Table structure (works similarly to regular .fits, but also lets you
         parse the data by rows.)
         '''
@@ -21,9 +21,10 @@ class ParameterSearch:
         self.header = fitsfile[1].header
         self.param_grid = np.array(parameter_array)
         self.directory = directory
+        self.multi = multi
         self.calculated_flarelist = [] #has format of [flare #, flare ID, max foxsi, mean foxsi, max hic, mean hic] for each tuple
         self.launches_df = pd.DataFrame(columns=('Flare_Number', 'Flare_ID', 'Trigger_Time', 'Cancelled?', 'Max_FOXSI', 'Mean_FOXSI', 'Max_HiC', 'Mean_HiC', 'Max_FOXSI_and_HiC_C5', 'Max_FOXSI_C5', 
-                        'Mean_FOXSI_C5', 'Max_HiC_C5', 'Mean_HiC_C5', 'Flare_C5', 'Flare_Class', 'Flare_Max_Flux', 'Peak_Time', 'Start_to_Peak', 'Background_Flux'))
+                        'Mean_FOXSI_C5', 'Max_HiC_C5', 'Mean_HiC_C5', 'Flare_C5', 'Flare_C5_10min', 'Flare_Class', 'Flare_Max_Flux', 'Peak_Time', 'Start_to_Peak', 'Background_Flux'))
         
         self.param_combo_results = pd.DataFrame(columns=('Param Combo', 'TN', 'TN_canc', 'TP', 'TP_noc5_obs', 'FN', 'FN_canc', 'FP_c5_noobs', 
                         'FP_noc5_noobs', 'Precision', 'Recall', 'Trigger-to-Launch'))
@@ -42,11 +43,14 @@ class ParameterSearch:
         for j, parameter in enumerate(self.param_grid):
             print(f'starting parameter search for {parameter}')
             self.loop_through_flares(arrays_to_check, parameter)
-            print('now trying to perform post-loop functions')
-            self.perform_postloop_functions(parameter, j)
-            self.save_launch_DataFrame(parameter)
-            self.calculated_flarelist = []
-            self.launches_df = self.launches_df.iloc[0:0]
+            if len(self.calculated_flarelist)>0:
+                print('now trying to perform post-loop functions')
+                self.perform_postloop_functions(parameter, j)
+                self.save_launch_DataFrame(parameter)
+                self.calculated_flarelist = []
+                self.launches_df = self.launches_df.iloc[0:0]
+            else:
+                print('No launches!!! FIX YO PARAMS')
         self.save_and_sort_comboDataFrames()
             
 
@@ -63,7 +67,10 @@ class ParameterSearch:
        for i, flare in enumerate(arrays_to_check):
            # print(flare)
            # print(flare[0])
-           self.flareloop_check_if_value_surpassed(flare[0], parameter, i)
+           if self.multi:
+               self.flareloop_check_if_value_surpassed(flare[0], parameter, i)
+           else:    
+               self.flareloop_check_if_value_surpassed(flare, parameter, i)
            if self.triggered_bool: 
                self.calculate_observed_xrsb_and_cancellation(i)         
 
@@ -143,9 +150,10 @@ class ParameterSearch:
         self.save_fitsinfo_to_df()
         self.calculate_c5_bool()
         self.drop_na()
-        self.save_launch_and_obs_arrays()
-        self.save_cf_input(j)
-        self.save_precision_recall_ttlscore(parameter, j)
+        if len(self.launches_df['Flare_ID']) > 0:
+            self.save_launch_and_obs_arrays()
+            self.save_cf_input(j)
+            self.save_precision_recall_ttlscore(parameter, j)
     
     def save_flarelist_to_df(self):
         ''' This is done outside of the loop (for all iterations). Saves calculated values to DataFrame for each flare.
@@ -252,7 +260,7 @@ class ParameterSearch:
         the parameters into the "good egg" and "bad egg" groups for plotting and analysis.
         '''
         precision = (self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'])/(self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'] +  self.param_combo_results.loc[j, 'FP_c5_noobs'] + self.param_combo_results.loc[j, 'FP_noc5_noobs'])
-        recall = (self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'])/(self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'] + self.param_combo_results.loc[j, 'FN'] + self.param_combo_results.loc[j, 'FN_canc'])
+        recall = (self.param_combo_results.loc[j, 'TP'])/(self.param_combo_results.loc[j, 'TP']  + self.param_combo_results.loc[j, 'FN'] + self.param_combo_results.loc[j, 'FN_canc'] + self.param_combo_results.loc[j, 'FP_c5_noobs'])
         ttl_score = (self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'] + 
                         self.param_combo_results.loc[j, 'FP_c5_noobs'] + self.param_combo_results.loc[j, 'FP_noc5_noobs'])/(
                         self.param_combo_results.loc[j, 'TP'] + self.param_combo_results.loc[j, 'TP_noc5_obs'] +
@@ -274,15 +282,18 @@ class ParameterSearch:
         '''   
         recall_min_score = 0.4
         ttl_min_score = 0.4
-        good_egg = (self.param_combo_results['Recall']>0.4) & (self.param_combo_results['Trigger-to-Launch'] > 0.4)
-        self.good_egg_combos = self.param_combo_results[good_egg]
-        self.good_egg_combos.sort_values(by='Precision')
-        self.bad_egg_combos = self.param_combo_results[~good_egg]
-        self.bad_egg_combos.sort_values(by='Precision')
+        if len(self.param_combo_results['Recall']) > 0:
+            good_egg = (self.param_combo_results['Recall']>0.4) & (self.param_combo_results['Trigger-to-Launch'] > 0.4)
+            self.good_egg_combos = self.param_combo_results[good_egg]
+            self.good_egg_combos.sort_values(by='Precision')
+            self.bad_egg_combos = self.param_combo_results[~good_egg]
+            self.bad_egg_combos.sort_values(by='Precision')
         
-        self.good_egg_combos.to_csv(f'{self.directory}/GoodEggParams/Good_combo_results.csv')
-        self.bad_egg_combos.to_csv(f'{self.directory}/BadEggParams/Bad_combo_results.csv')
-        print('combo param df saved')
+            self.good_egg_combos.to_csv(f'{self.directory}/GoodEggParams/Good_combo_results.csv')
+            self.bad_egg_combos.to_csv(f'{self.directory}/BadEggParams/Bad_combo_results.csv')
+            print('combo param df saved')
+        else:
+            print('Literally no launches??')
         
         
              

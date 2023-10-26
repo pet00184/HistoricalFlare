@@ -11,9 +11,10 @@ calculated_params = 'GOES_computed_parameters.fits' #change depending on if you 
 cparam_hdu = fits.open(calculated_params)
 cparam = cparam_hdu[1].data
 
-flare_fits = 'GOES_XRS_historical.fits'
+flare_fits = 'GOES_XRS_historical_finalversion.fits'
 fitsfile = fits.open(flare_fits)
 flare_data = fitsfile[1].data
+
 
 ################# Dictionary of all Parameters ################################################################        
 params = {
@@ -46,20 +47,28 @@ params = {
     '3temp_diff': [[.05, .1, .25, .5, 1], cparam[f'Temp 3-min Differences']],
     '4temp_diff': [[.05, .1, .25, .5, 1], cparam[f'Temp 4-min Differences']],
     '5temp_diff': [[.05, .1, .25, .5, 1], cparam[f'Temp 5-min Differences']],
-    'temp': [[.01, .05, .1, .15], cparam[f'Temperature (xrsa/xrsb)']]
+    'temp': [[.01, .05, .1, .15], cparam[f'Temperature (xrsa/xrsb)']], 
+    'em': [[2e48, 3e48, 4e48, 5e48, 6e48, 7e48], flare_data['em']],
+    '1em_diff': [[1e47, 3e47, 5e47], flare_data['1-min em diff']], 
+    '2em_diff': [[1e47, 3e47, 5e47, 7e47], flare_data['2-min em diff']], 
+    '3em_diff': [[1e47, 3e47, 5e47, 7e47], flare_data['3-min em diff']], 
+    '4em_diff': [[1e47, 3e47, 5e47, 7e47, 1e48], flare_data['4-min em diff']], 
+    '5em_diff': [[1e47, 5e47, 7e47, 1e48, 3e48], flare_data['5-min em diff']], 
+    
     }
 ################################################################################################################
 
 
 class Running_ParamSearch:
     
-    def __init__(self, param_directory):
+    def __init__(self, param_directory, multi=False):
+        self.multi = multi
         self.param_directory = param_directory
         if not os.path.exists(self.param_directory):
             os.mkdir(self.param_directory)
             
     def run_paramsearch(self, combos, combo_arrays):
-        param_search = ps.ParameterSearch(combos, self.param_directory)
+        param_search = ps.ParameterSearch(combos, self.param_directory, self.multi)
         param_search.loop_through_parameters(combo_arrays)
     
         plotting = pr.Assessing_Data(f'{self.param_directory}/GoodEggParams/Good_combo_results.csv', 
@@ -72,30 +81,37 @@ def single_run(param_directory, param, array):
     
 def multi_run(param_directory, param_combo_list, param_array_list):
     combo_params = np.array(param_combo_list).T.reshape(-1, len(param_combo_list))
-    combo_arrays = list(zip(param_array_list))
-    run = Running_ParamSearch(param_directory)
+    combo_arrays = param_array_list
+    run = Running_ParamSearch(param_directory, multi=False)
     run.run_paramsearch(combo_params, combo_arrays)
     
     
     
 if __name__ == '__main__':
+    #going through each value independently
+    for key, value in params.items():
+        print(f'DOING {key} RUN!!')
+        single_run(os.path.join('Single_V4', key), value[0], value[1])
     
-    # #going through each value independently
-    # for key, value in params.items():
-    #     print(f'DOING {key} RUN!!')
-    #     single_run(os.path.join('New_Single', key), value[0], value[1])
+    
+    #single_run(os.path.join('New_Single', 'em'), params['em'][0], params['em'][1])
+    # single_run(os.path.join('New_Single', '1em_diff'), params['1em_diff'][0], params['1em_diff'][1])
+    # single_run(os.path.join('New_Single', '2em_diff'), params['2em_diff'][0], params['2em_diff'][1])
+    # single_run(os.path.join('New_Single', '3em_diff'), params['3em_diff'][0], params['3em_diff'][1])
+    # single_run(os.path.join('New_Single', '4em_diff'), params['4em_diff'][0], params['4em_diff'][1])
+    # single_run(os.path.join('New_Single', '5em_diff'), params['5em_diff'][0], params['5em_diff'][1])
         
     #xrsb and others param search:
-    # for key, value in params.items():
-    #     if key=='xrsb':
-    #         continue
-    #     print(f'DOING XRSB + {key} RUN!!!')
-    #     param_combo_list = np.meshgrid(params['xrsb'][0], value[0],)
-    #     param_array_list = list(zip(params['xrsb'][1], value[1]))
-    #     multi_run(os.path.join('XRSB_TwoParam', key), param_combo_list, param_array_list)
+    for key, value in params.items():
+        if key=='xrsb':
+            continue
+        print(f'DOING XRSB + {key} RUN!!!')
+        param_combo_list = np.meshgrid(params['xrsb'][0], value[0],)
+        param_array_list = list(zip(params['xrsb'][1], value[1]))
+        multi_run(os.path.join('TwoParam_V4', key), param_combo_list, param_array_list)
         
-    #triple param test
+    # #triple param test
     param_combo_list = np.meshgrid(params['xrsb'][0], params['xrsa'][0], params['temp'][0])
     param_array_list = list(zip(params['xrsb'][1], params['xrsa'][1], params['temp'][1]))
-    multi_run(os.path.join('Triple_Test', 'xrsb_xrsa_temp'), param_combo_list, param_array_list)
+    multi_run(os.path.join('ThreeParam_V4', 'xrsb_xrsa_temp'), param_combo_list, param_array_list)
     
