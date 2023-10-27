@@ -102,16 +102,16 @@ if __name__ == '__main__':
     # single_run(os.path.join('New_Single', '5em_diff'), params['5em_diff'][0], params['5em_diff'][1])
         
     #xrsb and others param search:
-    for key, value in params.items():
-        if key=='xrsb':
-            continue
-        print(f'DOING XRSB + {key} RUN!!!')
-        param_combo_list = np.meshgrid(params['xrsb'][0], value[0],)
-        param_array_list = list(zip(params['xrsb'][1], value[1]))
-        multi_run(os.path.join('TwoParam_V4', key), param_combo_list, param_array_list)
+    # for key, value in params.items():
+    #     if key=='xrsb':
+    #         continue
+    #     print(f'DOING XRSB + {key} RUN!!!')
+    #     param_combo_list = np.meshgrid(params['xrsb'][0], value[0],)
+    #     param_array_list = list(zip(params['xrsb'][1], value[1]))
+    #     multi_run(os.path.join('TwoParam_V4', key), param_combo_list, param_array_list)
         
-    # #triple param test
-    param_combo_list = np.meshgrid(params['xrsb'][0], params['xrsa'][0], params['temp'][0])
-    param_array_list = list(zip(params['xrsb'][1], params['xrsa'][1], params['temp'][1]))
-    multi_run(os.path.join('ThreeParam_V4', 'xrsb_xrsa_temp'), param_combo_list, param_array_list)
+    # # #triple param test
+    # param_combo_list = np.meshgrid(params['xrsb'][0], params['xrsa'][0], params['temp'][0])
+    # param_array_list = list(zip(params['xrsb'][1], params['xrsa'][1], params['temp'][1]))
+    # multi_run(os.path.join('ThreeParam_V4', 'xrsb_xrsa_temp'), param_combo_list, param_array_list)
     
