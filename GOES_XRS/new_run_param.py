@@ -91,7 +91,7 @@ if __name__ == '__main__':
     #going through each value independently
     for key, value in params.items():
         print(f'DOING {key} RUN!!')
-        single_run(os.path.join('Single_V4', key), value[0], value[1])
+        single_run(os.path.join('Single_msi_test', key), value[0], value[1])
     
     
     #single_run(os.path.join('New_Single', 'em'), params['em'][0], params['em'][1])
