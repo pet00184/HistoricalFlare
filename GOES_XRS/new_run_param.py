@@ -88,10 +88,10 @@ def multi_run(param_directory, param_combo_list, param_array_list):
     
     
 if __name__ == '__main__':
-    #going through each value independently
-    for key, value in params.items():
-        print(f'DOING {key} RUN!!')
-        single_run(os.path.join('Single_msi_test', key), value[0], value[1])
+    # #going through each value independently
+#     for key, value in params.items():
+#         print(f'DOING {key} RUN!!')
+#         single_run(os.path.join('Single_msi_test', key), value[0], value[1])
     
     
     #single_run(os.path.join('New_Single', 'em'), params['em'][0], params['em'][1])
@@ -114,4 +114,14 @@ if __name__ == '__main__':
     # param_combo_list = np.meshgrid(params['xrsb'][0], params['xrsa'][0], params['temp'][0])
     # param_array_list = list(zip(params['xrsb'][1], params['xrsa'][1], params['temp'][1]))
     # multi_run(os.path.join('ThreeParam_V4', 'xrsb_xrsa_temp'), param_combo_list, param_array_list)
+    
+    # #quad param test:
+    # param_combo_list = np.meshgrid(params['xrsb'][0], params['xrsa'][0], params['temp'][0], params['em'][0])
+    # param_array_list = list(zip(params['xrsb'][1], params['xrsa'][1], params['temp'][1], params['em'][1]))
+    # multi_run(os.path.join('FourPlusParam_V4', 'xrsb_xrsa_temp_em'), param_combo_list, param_array_list)
+    
+    #just emission measure and temp:
+    param_combo_list1 = np.meshgrid(params['temp'][0], params['em'][0])
+    param_array_list1 = list(zip(params['temp'][1], params['em'][1]))
+    multi_run(os.path.join('Tests_1031', 'temp_em'), param_combo_list1, param_array_list1)
     
