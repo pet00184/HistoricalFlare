@@ -107,7 +107,7 @@ class ParameterSearch:
         if not len(triggered_check)==0:
             self.triggered_bool = True
             self.trigger_index = triggered_check[0]
-            self.foxsi_obs_start = self.trigger_index + 3 + 3 + 2 #latency + launch prep + launch time
+            self.foxsi_obs_start = self.trigger_index + 3 + 4 + 2 #latency + launch prep + launch time
             self.foxsi_obs_end = self.foxsi_obs_start + 6
             self.hic_obs_start = self.foxsi_obs_start + 2
             self.hic_obs_end = self.hic_obs_start + 6
