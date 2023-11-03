@@ -22,13 +22,17 @@ class Assessing_Data:
         self.bad_eggs = pd.read_csv(bad_results_df)
         self.main_directory = directory
         self.save_directory = os.path.join(directory, 'GoodEggParams')
+        self.bad_save_directory = os.path.join(directory, 'BadEggParams')
         if not os.path.exists(os.path.join(self.save_directory, 'ConfMatrix')):
+            os.makedirs(os.path.join(self.save_directory, 'ConfMatrix'))
+        if not os.path.exists(os.path.join(self.bad_save_directory, 'ConfMatrix')):
             os.makedirs(os.path.join(self.save_directory, 'ConfMatrix'))
         
     def make_all_plots(self):
         for i, param_combo in enumerate(self.combo_params['Param Combo']):
             self.make_confusion_matrix(i)
             self.plot_confusion_matrix(param_combo, i)
+            self.plot_bad_confusion_matrix(self.badd_eggs.loc[i, 'Param Combo'], i)
         self.plot_pr_2d()
         self.plot_pr_3d()
         self.plot_pr_2d(include_bad=True)
@@ -38,6 +42,10 @@ class Assessing_Data:
                         self.combo_params.loc[i, 'FP_noc5_noobs'], self.combo_params.loc[i, 'TP_noc5_obs']],
                         [self.combo_params.loc[i, 'FN'], self.combo_params.loc[i, 'FN_canc'], 
                         self.combo_params.loc[i, 'FP_c5_noobs'], self.combo_params.loc[i, 'TP']]])
+        self.bad_confusion_matrix = np.array([[self.bad_eggs.loc[i, 'TN'], self.bad_eggs.loc[i, 'TN_canc'], 
+                        self.bad_eggs.loc[i, 'FP_noc5_noobs'], self.bad_eggs.loc[i, 'TP_noc5_obs']],
+                        [self.bad_eggs.loc[i, 'FN'], self.bad_eggs.loc[i, 'FN_canc'], 
+                        self.bad_eggs.loc[i, 'FP_c5_noobs'], self.bad_eggs.loc[i, 'TP']]])
         
     def plot_confusion_matrix(self, param_combo, i):
         ''' This just plots the new and improved confusion matrix for the specific parameter!
@@ -57,6 +65,26 @@ class Assessing_Data:
         plt.suptitle(f'Parameters: {param_combo}')
         plt.title(f"Precision = {self.combo_params.loc[i, 'Precision']:.2f}, Recall = {self.combo_params.loc[i, 'Recall']:.2f}, LTT Ratio = {self.combo_params.loc[i, 'Trigger-to-Launch']:.2f}")
         plt.savefig(f'{self.save_directory}/ConfMatrix/{param_combo}confmatrix.png', dpi=200, bbox_inches='tight')
+        plt.close()
+        
+    def plot_bad_confusion_matrix(self, param_combo, i):
+        ''' This just plots the new and improved confusion matrix for the specific parameter!
+        '''
+        fig, ax = plt.subplots()
+        ax.matshow(self.bad_confusion_matrix, cmap=plt.cm.Blues, alpha=0.7)
+        for k in range(self.bad_confusion_matrix.shape[0]):
+            for j in range(self.bad_confusion_matrix.shape[1]):
+                ax.text(x=j, y=k,s=self.bad_confusion_matrix[k, j], va='center', ha='center', size='xx-large')
+        ylabels = ['', 'False', 'True']
+        ax.set_ylabel('Flare above C5?', fontsize=14)
+        ax.set_yticklabels(ylabels, rotation=90, fontsize=12)
+        ax.xaxis.set_ticks_position("bottom")
+        xlabels = ['', 'No Trigger', 'Cancelled Launch','Launch \n No C5 Obs', 'Launch \n C5 Obs']
+        ax.set_xlabel('Launch Results', fontsize=14)
+        ax.set_xticklabels(xlabels, fontsize=12)
+        plt.suptitle(f'Parameters: {param_combo}')
+        plt.title(f"Precision = {self.bad_eggs.loc[i, 'Precision']:.2f}, Recall = {self.bad_eggs.loc[i, 'Recall']:.2f}, LTT Ratio = {self.bad_eggs.loc[i, 'Trigger-to-Launch']:.2f}")
+        plt.savefig(f'{self.bad_save_directory}/ConfMatrix/{param_combo}confmatrix.png', dpi=200, bbox_inches='tight')
         plt.close()
         
     def plot_pr_2d(self, include_bad=False):
