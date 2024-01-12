@@ -3,9 +3,10 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from scipy import stats as st
+import os
 
 
-flare_fits = '../GOES_XRS_historical.fits'
+flare_fits = '../GOES_XRS_historical_finalversion.fits'
 
 class FITS_plots:
     
@@ -18,16 +19,18 @@ class FITS_plots:
         xrsa = self.data['xrsa'][i]
         xrsb = self.data['xrsb'][i]
         time = self.data['time'][i]
+        x_axis = np.arange(-15, len(xrsa)-15)
         
         fig, ax = plt.subplots(1,1,figsize=(8,4))
-        ax.plot(time, xrsb, c='r')
-        ax.plot(time, xrsa, c='b')
+        ax.plot(x_axis[15:-15], xrsb[15:-15], c='r')
+        ax.plot(x_axis[15:-15], xrsa[15:-15], c='b')
         ax.set_yscale('log')
         ax.set_ylabel('GOES Flux (W/m^2)')
-        ax.set_xlabel('Time (s)')
+        ax.set_xlabel('Duration (Minutes)')
         ax.set_title(f'{self.data["UTC peak time"][i][:16]}, Class={self.data["class"][i]}')
        # plt.savefig('example_lc.png', bbox_inches='tight', dpi=200)
-        plt.show()
+        #plt.show()
+        return plt
         
     def peak_flux_histogram(self):
         peak_flux = self.data['peak flux']
@@ -132,12 +135,52 @@ class FITS_plots:
         plt.savefig('GOESbyyear_barplot.png', bbox_inches='tight', dpi=200)
         plt.show()
         
+    def duration_histogram(self):
+        abovemask = np.where(self.data['above c5']==True)[0]
+        above_c5 = self.data['xrsa'][abovemask]
+        belowmask = np.where(self.data['above c5']==False)[0]
+        below_c5 = self.data['xrsa'][belowmask]
+     
+        above_c5_lengths = [len(above_c5[i])-30 for i, data in enumerate(above_c5)]
+        both_length = len(np.where(np.array(above_c5_lengths) > 60)[0])
+        below_c5_lengths = [len(below_c5[i])-30 for i, data in enumerate(below_c5)]
+        total_lengths = [len(self.data['xrsa'][i])-30 for i, data in enumerate(self.data['xrsa'])]
+        duration_above_60 = len(np.where(np.array(total_lengths) > 60)[0])
+        fig, ax = plt.subplots(1,1, figsize=(8,6))
+        ax.hist([below_c5_lengths, above_c5_lengths], bins=25, range=(0, 250), stacked=True, color=['b', 'r'], label=['Below C5', 'Above C5'])
+        #ax.hist(above_c5_lengths, range=(0, 250), color='r', stacked=True)
+        ax.axvline(60, c='k', lw=2)
+        ax.set_title(f'Flare Duration \n Over 60 Min. = {duration_above_60}, Above C5 = {len(above_c5)}, Both = {both_length}')
+        ax.set_ylabel('Number of Flares')
+        ax.set_xlabel('Minutes')
+        ax.legend()
+        plt.savefig('duration_histogram.png', dpi=250)
+        plt.show()
+        
+        self.long_ones = np.where(np.array(total_lengths) > 200)[0]
+        #plt.show()
+        
+    def long_plots(self):
+        os.makedirs('Long_Duration_Plots', exist_ok=True)
+        for i in self.long_ones:
+            plt = self.plot_one(i)
+            plt.savefig(f'Long_Duration_Plots/plot_{i}.png')
+            
+        
+        
+        
+        
 if __name__ == '__main__':
     test = FITS_plots(flare_fits)
     #test.plot_one(2)
     #test.peak_flux_histogram()
     #test.time_to_peak_histogram()
-    test.ttp_histogram_c5()
+    # test.ttp_histogram_c5()
     # test.year_hists()
     # test.year_barplot()
     #test.c5_10min_histogram()
+    test.duration_histogram()
+    
+    
+    #test.plot_one(75)
+    #test.long_plots()
