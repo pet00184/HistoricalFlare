@@ -1,3 +1,4 @@
 GOES_XRS/GOES_computed_parameters.fits
 GOES_XRS/GOES_XRS_historical_finalversion.fits
-GOES_XRS/RESULTS/*
+GOES_XRS/Old_Work/RESULTS/*
+GOES_XRS/ParameterSearch/RESULTS/*
